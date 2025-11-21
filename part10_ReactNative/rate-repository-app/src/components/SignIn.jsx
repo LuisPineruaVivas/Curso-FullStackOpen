@@ -3,9 +3,11 @@
  import { useFormik } from 'formik';
  import * as yup from 'yup';
  import Text from './Text';
+import useSignIn from '../hooks/useSignIn';
+import { useNavigate } from 'react-router-native';
 
  const validationSchema = yup.object().shape({
-   userName: yup
+   username: yup
      .string()
      .required('Username is required'),
    password: yup
@@ -41,26 +43,40 @@
  });
 
 const SignIn = () => {
+  const [signIn] = useSignIn();
+  const navigate = useNavigate();
+
+  const onSubmit = async ({ username, password }) => {
+    try {
+      const data  = await signIn({ username, password });
+      if (data.authenticate) {
+        navigate('/');
+      }
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
   const formik = useFormik({
      initialValues: {
-       userName: '',
+       username: '',
        password: '',
      },
      validationSchema,
      onSubmit: values => {
-       alert(JSON.stringify(values, null, 2));
+       onSubmit(values);
      },
    });
    return (
      <View style={styles.container}>
       <TextInput 
         error
-        style={{...styles.input, borderColor: formik.errors.userName ? 'red' : theme.colors.textSecondary}}
+        style={{...styles.input, borderColor: formik.errors.username ? 'red' : theme.colors.textSecondary}}
         placeholder="Username"
-        value={formik.values.userName}
-        onChangeText={formik.handleChange('userName')}
+        value={formik.values.username}
+        onChangeText={formik.handleChange('username')}
       />
-      {formik.errors.userName && <Text color="error">{formik.errors.userName}</Text>}
+      {formik.errors.username && <Text color="error">{formik.errors.username}</Text>}
       <TextInput secureTextEntry
         style={{...styles.input, borderColor: formik.errors.password ? 'red' : theme.colors.textSecondary}}
         placeholder="Password"
