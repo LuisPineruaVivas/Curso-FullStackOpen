@@ -1,8 +1,8 @@
- import { TextInput, Pressable, View, StyleSheet } from 'react-native';
- import theme from '../theme';
- import { useFormik } from 'formik';
- import * as yup from 'yup';
- import Text from './Text';
+import { TextInput, Pressable, View, StyleSheet } from 'react-native';
+import theme from '../theme';
+import { useFormik } from 'formik';
+import * as yup from 'yup';
+import Text from './Text';
 import useSignIn from '../hooks/useSignIn';
 import { useNavigate } from 'react-router-native';
 
@@ -42,21 +42,7 @@ import { useNavigate } from 'react-router-native';
   }
  });
 
-const SignIn = () => {
-  const [signIn] = useSignIn();
-  const navigate = useNavigate();
-
-  const onSubmit = async ({ username, password }) => {
-    try {
-      const data  = await signIn({ username, password });
-      if (data.authenticate) {
-        navigate('/');
-      }
-    } catch (e) {
-      alert(e.message);
-    }
-  };
-
+export const SignInForm = ({ onSubmit }) => {
   const formik = useFormik({
      initialValues: {
        username: '',
@@ -67,8 +53,9 @@ const SignIn = () => {
        onSubmit(values);
      },
    });
-   return (
-     <View style={styles.container}>
+
+  return (
+    <View style={styles.container}>
       <TextInput 
         error
         style={{...styles.input, borderColor: formik.errors.username ? 'red' : theme.colors.textSecondary}}
@@ -88,6 +75,26 @@ const SignIn = () => {
         <Text color="white" fontWeight="bold" fontSize="subheading" >Sign In</Text>
       </Pressable>
     </View>
+  );
+};
+
+const SignIn = () => {
+  const [signIn] = useSignIn();
+  const navigate = useNavigate();
+
+  const onSubmit = async ({ username, password }) => {
+    try {
+      const data  = await signIn({ username, password });
+      if (data.authenticate) {
+        navigate('/');
+      }
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+   return (
+     <SignInForm onSubmit={onSubmit} />
    );
 };
 

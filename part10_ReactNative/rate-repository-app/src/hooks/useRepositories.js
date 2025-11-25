@@ -1,21 +1,36 @@
-import { useState, useEffect } from 'react';
 import { useQuery } from "@apollo/client/react";
 import { GET_REPOSITORIES } from '../graphql/queries';
 
-const useRepositories = () => {
-  const [repositories, setRepositories] = useState();
-  const { data, errpr, loading } = useQuery(GET_REPOSITORIES, {
+const useRepositories = ({ orderBy, orderDirection, searchKeyword, first}) => {
+  const { data, loading, fetchMore, ...result } = useQuery(GET_REPOSITORIES, {
+    variables: { orderBy, orderDirection, searchKeyword, first },
     fetchPolicy: 'cache-and-network',
     });
 
-  useEffect(() => {
-    if (data) {
-      setRepositories(data.repositories);
+    const handleFetchMore = () => {
+    const canFetchMore = !loading && data?.repositories.pageInfo.hasNextPage;
+
+    if (!canFetchMore) {
+      return;
     }
-  }, [data]);
 
+    fetchMore({
+      variables: {
+        after: data.repositories.pageInfo.endCursor,
+        first,
+        orderBy,
+        orderDirection,
+        searchKeyword
+      },
+    });
+  };
 
-  return { repositories, loading };
+  return { 
+    repositories: data?.repositories, 
+    fetchMore: handleFetchMore, 
+    loading,
+    ...result
+  };
 };
 
 export default useRepositories;
